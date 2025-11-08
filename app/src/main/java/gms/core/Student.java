@@ -117,7 +117,7 @@ public class Student {
 
   public double latest(int sem, String subject, Exam ex) {
     Subject s = findSubject(sem, subject);
-    return (s == null) ? 0.0 : (s.latest(ex) == null) ? s.latest(ex) : 0.0;
+    return (s == null) ? 0.0 : (s.latest(ex) == null) ? 0.0 : s.latest(ex);
   }
 
   public boolean rollbackMark(int sem, String subject, Exam ex) {
