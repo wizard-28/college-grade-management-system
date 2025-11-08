@@ -2,14 +2,7 @@
 
 ## How to run?
 
-On Linux/Mac:
-
 ```bash
-./gradlew run --console=plain --quiet
-```
-
-On Windows
-
-```cmd
-./gradlew.bat run --console=plain --quiet
+javac -d out $(find app/src/main/java -name "*.java")
+java -cp out gms.App
 ```
