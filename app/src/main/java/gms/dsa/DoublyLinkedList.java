@@ -102,6 +102,24 @@ public class DoublyLinkedList<T> implements List<T> {
     };
   }
 
+  public Iterator<T> reverseIterator() { // top → bottom in stack
+    return new Iterator<T>() {
+      Node<T> cur = tail;
+
+      public boolean hasNext() {
+        return cur != null;
+      }
+
+      public T next() {
+        if (!hasNext())
+          throw new NoSuchElementException();
+        T v = cur.data;
+        cur = cur.prev;
+        return v;
+      }
+    };
+  }
+
   @Override
   public T get(int index) {
     return getNode(index).data;

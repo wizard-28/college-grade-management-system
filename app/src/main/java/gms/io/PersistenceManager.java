@@ -55,7 +55,7 @@ public class PersistenceManager {
               subjects.row(s.id(), sem, sub);
               for (Exam ex : new Exam[] { Exam.CAT1, Exam.CAT2, Exam.FAT }) {
                 StringBuilder values = new StringBuilder();
-                var hist = s.history(sem, sub, ex);
+                var hist = s.marksHistory(sem, sub, ex);
                 for (int i = 0; i < hist.size(); i++) {
                   values.append(hist.get(i));
                   if (i + 1 < hist.size())

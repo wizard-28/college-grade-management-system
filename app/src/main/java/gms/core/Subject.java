@@ -38,7 +38,11 @@ public class Subject {
     return s.peek();
   }
 
-  public List<Double> history(Exam ex) {
-    return marks.get(ex).toList(); // bottom..top
+  public List<Double> marksHistory(Exam ex) {
+    return marks.get(ex).toList();
+  }
+
+  public void printHistory(Exam ex) {
+    marks.get(ex).display();
   }
 }

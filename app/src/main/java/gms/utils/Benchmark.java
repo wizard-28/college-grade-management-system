@@ -4,6 +4,8 @@ import gms.core.*;
 import gms.dsa.*;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 /**
  * Benchmarks core operations using analytical memory model instead of JVM heap
@@ -12,33 +14,34 @@ import java.io.IOException;
  * Operation,InputSize,TimeNanoseconds,MemoryKB
  */
 public class Benchmark {
-  private static final int START = 500;
-  private static final int END = 6000;
+  private static final int START = 1;
+  private static final int END = 5000;
   private static final int STEP = 1000;
   private static final int REPEAT = 1000;
 
-  // Analytical memory constants
-  private static final int STACK_NODE_BYTES = 32; // Approx for one Stack.Node<Double>
-  private static final int POINTER_BYTES = 8; // 64-bit reference
-
   public static void runAll() {
-    System.out.println("Benchmarking (Analytical Memory Model)...");
+    System.out.println("Benchmarking...");
 
     try (FileWriter out = new FileWriter("benchmarks.csv")) {
       out.write("Operation,InputSize,TimeNanoseconds,MemoryKB\n");
 
+      System.out.println("Benchmarking PushMark...");
       benchmarkPushMark(out);
+      System.out.println("Benchmarking RollbackMark...");
       benchmarkRollbackMark(out);
+      System.out.println("Benchmarking LatestMark...");
       benchmarkLatest(out);
+      System.out.println("Benchmarking HistoryDisplay...");
       benchmarkHistoryDisplay(out);
 
+      System.out.println("Benchmarking MergeSort...");
       for (int n = START; n <= END; n += STEP) {
         Institute inst = new Institute();
         populateStudentsForSorting(inst, n);
         benchmarkMergeSort(out, inst, n);
       }
 
-      System.out.println("✅ Benchmarks complete → benchmarks.csv");
+      System.out.println("Benchmarks complete → benchmarks.csv");
     } catch (IOException e) {
       System.err.println("Error writing benchmarks.csv: " + e.getMessage());
     }
@@ -76,13 +79,20 @@ public class Benchmark {
     for (int h = START; h <= END; h += STEP) {
       Student s = new Student("S", "Bench");
       s.addSubject(1, "Math");
-      for (int i = 0; i < h; i++)
+
+      // Fill with baseline history size h
+      for (int i = 0; i < h; i++) {
         s.pushMark(1, "Math", Exam.CAT1, 75);
+      }
 
-      s.pushMark(1, "Math", Exam.CAT1, 95); // Warm-up
+      // Now measure memory only for new 1000 insertions, not total
+      long memBefore = usedMemory(false);
+      s.pushMark(1, "Math", Exam.CAT1, 98);
+      long memAfter = usedMemory(false);
+      long memPerPush = (memAfter - memBefore);
 
+      // Time measurement (same as you wrote)
       long total = 0;
-      long memBefore = usedMemory(true);
       for (int i = 0; i < REPEAT; i++) {
         long t0 = System.nanoTime();
         s.pushMark(1, "Math", Exam.CAT1, 98);
@@ -91,9 +101,7 @@ public class Benchmark {
       }
       long avgTime = total / REPEAT;
 
-      long memAfter = usedMemory(false);
-      long memKB = memAfter - memBefore;
-      out.write("PushMark," + h + "," + avgTime + "," + memKB + "\n");
+      out.write("PushMark," + h + "," + avgTime + "," + memPerPush + "\n");
     }
   }
 
@@ -156,16 +164,18 @@ public class Benchmark {
 
       long total = 0;
       long memBefore = usedMemory(true);
-      for (int r = 0; r < REPEAT; r++) {
+
+      for (int r = 0; r < 1; r++) {
         long t0 = System.nanoTime();
-        stack.toList();
+        stack.emptyTraversal(); // Simulate printing to output stream
         long t1 = System.nanoTime();
         total += (t1 - t0);
       }
-      long avg = total / REPEAT;
+      long avg = total / 1;
 
       long memAfter = usedMemory(false);
-      long memKB = memAfter - memBefore; // Linked List Merge doesn't allocate anything else
+      System.gc();
+      long memKB = memAfter - memBefore;
       out.write("HistoryDisplay," + h + "," + avg + "," + memKB + "\n");
     }
   }

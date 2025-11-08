@@ -363,18 +363,8 @@ public class CLI {
     int idx = readInt("Choose subject (number): ", 1, subs.size());
     String sub = subs.get(idx - 1);
     for (Exam ex : new Exam[] { Exam.CAT1, Exam.CAT2, Exam.FAT }) {
-      List<Double> hist = s.history(s.semester(), sub, ex);
       System.out.print(ex.display() + " history (latest to earliest): ");
-      if (hist.isEmpty())
-        System.out.print("(none)");
-      else {
-        for (int i = 0; i < hist.size(); i++) {
-          System.out.print(hist.get(i));
-          if (i < hist.size() - 1) {
-            System.out.print(", ");
-          }
-        }
-      }
+      s.printHistory(s.semester(), sub, ex);
       System.out.println();
     }
     waitEnter();

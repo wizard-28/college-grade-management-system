@@ -104,9 +104,16 @@ public class Student {
     ensureSubject(sem, subject).addMark(ex, mark);
   }
 
-  public List<Double> history(int sem, String subject, Exam ex) {
+  public List<Double> marksHistory(int sem, String subject, Exam ex) {
     Subject s = findSubject(sem, subject);
-    return (s == null) ? Collections.emptyList() : s.history(ex);
+    return (s == null) ? Collections.emptyList() : s.marksHistory(ex);
+  }
+
+  public void printHistory(int sem, String subject, Exam ex) {
+    Subject s = findSubject(sem, subject);
+    if (s != null) {
+      s.printHistory(ex);
+    }
   }
 
   public double latest(int sem, String subject, Exam ex) {

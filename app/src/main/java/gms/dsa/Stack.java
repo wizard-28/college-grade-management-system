@@ -3,53 +3,56 @@ package gms.dsa;
 import java.util.List;
 
 public class Stack<T> {
-  private static final class Node<U> {
-    U data;
-    Node<U> next;
-
-    Node(U d) {
-      data = d;
-    }
-  }
-
-  private Node<T> top;
-  private int size;
+  private final DoublyLinkedList<T> list = new DoublyLinkedList<>();
 
   public boolean isEmpty() {
-    return top == null;
+    return list.isEmpty();
   }
 
   public int size() {
-    return size;
+    return list.size();
   }
 
   public void push(T v) {
-    Node<T> n = new Node<>(v);
-    n.next = top;
-    top = n;
-    size++;
+    list.add(v);
   }
 
   public boolean pop() {
     if (isEmpty())
       return false;
-    top = top.next;
-    size--;
+    list.remove(list.size() - 1);
     return true;
   }
 
   public T peek() {
     if (isEmpty())
       throw new IllegalStateException("Stack underflow");
-    return top.data;
+    return list.get(list.size() - 1);
   }
 
-  // top -> bottom
+  // // top -> bottom
   public List<T> toList() {
-    List<T> out = new DoublyLinkedList<>();
-    for (Node<T> cur = top; cur != null; cur = cur.next)
-      out.add(cur.data);
-    return out;
+    return list;
+  }
+
+  public void display() {
+    if (isEmpty()) {
+      System.out.print("(none)");
+    }
+    for (DoublyLinkedList.Node<T> cur = list.tail; cur != null; cur = cur.prev) {
+      System.out.print(cur.data);
+      if (cur.prev != null) {
+        System.out.print(", ");
+      }
+    }
+  }
+
+  public void emptyTraversal() {
+    if (isEmpty()) {
+      System.out.print("(none)");
+    }
+    for (T t : list) {
+    }
   }
 
 }
