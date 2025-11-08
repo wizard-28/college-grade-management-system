@@ -122,8 +122,7 @@ if "MergeSort" in data:
     x = [row[0] for row in data["MergeSort"]]
     m = [row[2] for row in data["MergeSort"]]
     ax.plot(x, m, marker="o", label="MergeSort")
-    # expected extra memory ~ O(n) for merge buffer
-    plot_linear(ax, x, m, "O(n) Ref")
+    plot_flat(ax, x, m, "O(1) Ref")
 ax.set_title("Memory — Merge Sort vs Students", fontsize=11)
 ax.set_xlabel("Number of Students")
 ax.set_ylabel("Δ Memory (KB)")

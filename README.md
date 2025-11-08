@@ -12,6 +12,13 @@ javac -d out -sourcepath app/src/main/java app/src/main/java/gms/App.java
 java -cp out gms.App
 ```
 
+## How to benchmark?
+
+```bash
+javac -d out -sourcepath app/src/main/java app/src/main/java/gms/App.java
+java -XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC -XX:+AlwaysPreTouch -cp out gms.App # Disable GC for stable memory usage statistics
+```
+
 ## Project Architecture Overview
 
 ```monospace
@@ -42,3 +49,7 @@ gms
 └── utils/
     └── Benchmark.java  -> Analytical benchmarking for operations
 ```
+
+## Benchmarks
+
+![Benchmarks Image](docs/benchmark.png)

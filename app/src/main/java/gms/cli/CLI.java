@@ -46,8 +46,7 @@ public class CLI {
           } catch (Exception e) {
             System.out.println("Could not run Python script: " + e.getMessage());
           }
-          waitEnter();
-          break;
+          return;
         case 3:
           System.out.println("Exiting...");
           return;

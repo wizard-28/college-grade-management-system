@@ -12,8 +12,8 @@ import java.io.IOException;
  * Operation,InputSize,TimeNanoseconds,MemoryKB
  */
 public class Benchmark {
-  private static final int START = 1;
-  private static final int END = 5000;
+  private static final int START = 500;
+  private static final int END = 10000;
   private static final int STEP = 1000;
   private static final int REPEAT = 1000;
 
@@ -183,18 +183,30 @@ public class Benchmark {
     DoublyLinkedList<Student> list = inst.getAllStudents();
     MergeSort.sort(list, (a, b) -> Double.compare(b.getCGPA(), a.getCGPA())); // warm-up
 
-    long total = 0;
-    long memBefore = usedMemory(true);
+    DoublyLinkedList<DoublyLinkedList<Student>> copies = new DoublyLinkedList<>();
     for (int r = 0; r < REPEAT; r++) {
-      DoublyLinkedList<Student> copy = new DoublyLinkedList<>(list);
+      copies.add(new DoublyLinkedList<>(list)); // pre-allocate outside memory measurement
+    }
+
+    long total = 0;
+    for (DoublyLinkedList<Student> copy : copies) {
       long t0 = System.nanoTime();
       MergeSort.sort(copy, (a, b) -> Double.compare(b.getCGPA(), a.getCGPA()));
       long t1 = System.nanoTime();
       total += (t1 - t0);
     }
-    long avg = total / REPEAT;
-    long memAfter = usedMemory(false);
-    long memKB = memAfter - memBefore; // Linked List Merge doesn't allocate anything else
+
+    long totalMem = 0;
+    for (DoublyLinkedList<Student> copy : copies) {
+      long before = usedMemory(true);
+      MergeSort.sort(copy, (a, b) -> Double.compare(b.getCGPA(), a.getCGPA()));
+      long after = usedMemory(false);
+      totalMem += (after - before);
+    }
+
+    System.gc();
+    long avg = total / copies.size();
+    long memKB = totalMem / copies.size();
 
     out.write("MergeSort," + n + "," + avg + "," + memKB + "\n");
   }
