@@ -88,9 +88,11 @@ nb-configuration.xml
 ## Miscellaneous
 ##############################
 *.log
+benchmarks.csv
 
 ##############################
 ## Database
 ##############################
 app/data/
 data/
+

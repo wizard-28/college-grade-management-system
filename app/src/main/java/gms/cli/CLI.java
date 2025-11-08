@@ -111,7 +111,7 @@ public class CLI {
           Benchmark.runAll();
           System.out.println("Generating plots with Python...");
           try {
-            ProcessBuilder pb = new ProcessBuilder("python3", "scripts/plot_benchmarks.py");
+            ProcessBuilder pb = new ProcessBuilder("python3", "app/scripts/plot_benchmarks.py");
             pb.inheritIO();
             Process process = pb.start();
             int exitCode = process.waitFor();
