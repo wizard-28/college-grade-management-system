@@ -1,8 +1,8 @@
 package gms.core;
 
 import gms.dsa.MergeSort;
+import gms.dsa.DoublyLinkedList;
 import gms.dsa.HashMap;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +13,7 @@ public class Student {
   private final String name;
   private int semester = 1;
 
-  private final List<HashMap<String, Subject>> semSubs = new ArrayList<>();
+  private final List<HashMap<String, Subject>> semSubs = new DoublyLinkedList<>();
   private final Map<Integer, Double> sgpa = new HashMap<>();
   private double cgpa = 0.0;
 
@@ -94,7 +94,7 @@ public class Student {
   public List<String> listSubjects(int sem) {
     if (sem <= 0 || sem > semSubs.size())
       return Collections.emptyList();
-    List<String> names = new ArrayList<>(semSubs.get(sem - 1).keySet());
+    DoublyLinkedList<String> names = new DoublyLinkedList<>(semSubs.get(sem - 1).keySet());
     MergeSort.sort(names, String::compareTo);
     return names;
   }
@@ -111,7 +111,7 @@ public class Student {
 
   public double latest(int sem, String subject, Exam ex) {
     Subject s = findSubject(sem, subject);
-    return (s == null) ? 0.0 : s.latest(ex).orElse(0.0);
+    return (s == null) ? 0.0 : (s.latest(ex) == null) ? s.latest(ex) : 0.0;
   }
 
   public boolean rollbackMark(int sem, String subject, Exam ex) {
@@ -144,17 +144,17 @@ public class Student {
     System.out.println(line);
 
     inner.forEach((subName, subj) -> {
-      Optional<Double> c1 = subj.latest(Exam.CAT1);
-      Optional<Double> c2 = subj.latest(Exam.CAT2);
-      Optional<Double> fat = subj.latest(Exam.FAT);
+      Double c1 = subj.latest(Exam.CAT1);
+      Double c2 = subj.latest(Exam.CAT2);
+      Double fat = subj.latest(Exam.FAT);
 
-      boolean missing = !(c1.isPresent() && c2.isPresent() && fat.isPresent());
-      double total = missing ? 0.0 : 0.3 * c1.get() + 0.3 * c2.get() + 0.4 * fat.get();
+      boolean missing = (c1 == null || c2 == null || fat == null);
+      double total = missing ? 0.0 : 0.3 * c1 + 0.3 * c2 + 0.4 * fat;
 
       System.out.printf("%-22s", subName);
-      System.out.printf("%-10s", c1.map(String::valueOf).orElse("-"));
-      System.out.printf("%-10s", c2.map(String::valueOf).orElse("-"));
-      System.out.printf("%-10s", fat.map(String::valueOf).orElse("-"));
+      System.out.printf("%-10s", c1 == null ? "-" : c1);
+      System.out.printf("%-10s", c2 == null ? "-" : c2);
+      System.out.printf("%-10s", fat == null ? "-" : fat);
 
       if (missing)
         System.out.printf("%-10s%s%n", "-", "-");
@@ -179,9 +179,12 @@ public class Student {
 
     int totalCredits = 0, sumGrades = 0;
     for (var subj : inner.values()) {
-      double total = 0.3 * subj.latest(Exam.CAT1).orElse(0.0) +
-          0.3 * subj.latest(Exam.CAT2).orElse(0.0) +
-          0.4 * subj.latest(Exam.FAT).orElse(0.0);
+      Double cat1 = subj.latest(Exam.CAT1);
+      Double cat2 = subj.latest(Exam.CAT2);
+      Double fat = subj.latest(Exam.FAT);
+      double total = 0.3 * (cat1 == null ? 0.0 : cat1) +
+          0.3 * (cat2 == null ? 0.0 : cat2) +
+          0.4 * (fat == null ? 0.0 : fat);
 
       sumGrades += gradePoints(total);
       totalCredits++;

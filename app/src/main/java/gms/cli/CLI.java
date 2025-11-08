@@ -4,6 +4,7 @@ import gms.core.Exam;
 import gms.core.Institute;
 import gms.core.Student;
 import gms.utils.Benchmark;
+import gms.dsa.DoublyLinkedList;
 import gms.dsa.MergeSort;
 
 import java.util.List;
@@ -262,7 +263,7 @@ public class CLI {
   }
 
   private void viewAllSorted() {
-    List<Student> all = inst.getAllStudents();
+    DoublyLinkedList<Student> all = inst.getAllStudents();
     MergeSort.sort(all, (a, b) -> Double.compare(b.getCGPA(), a.getCGPA()));
     System.out.println("=== Students Sorted by CGPA ===");
     for (Student s : all) {

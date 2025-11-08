@@ -1,6 +1,12 @@
 package gms.dsa;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class HashMap<K, V> implements Map<K, V> {
@@ -32,53 +38,42 @@ public class HashMap<K, V> implements Map<K, V> {
     }
   }
 
-  private List<Node<K, V>> buckets;
+  private Node<K, V>[] buckets;
   private int size;
   private float maxLoad = 0.75f;
 
+  @SuppressWarnings("unchecked")
   public HashMap() {
-    buckets = new ArrayList<>();
+    buckets = (Node<K, V>[]) new Node[16];
   }
 
   private int idxFor(Object key, int mod) {
     return (key == null ? 0 : (key.hashCode() & 0x7fffffff)) % mod;
   }
 
-  private void initIfEmpty() {
-    if (buckets.isEmpty()) {
-      for (int i = 0; i < 16; i++)
-        buckets.add(null);
-    }
-  }
-
+  @SuppressWarnings("unchecked")
   private void rehashIfNeeded() {
-    initIfEmpty();
-    float lf = (float) size / (float) buckets.size();
+    float lf = (float) size / (float) buckets.length;
     if (lf <= maxLoad)
       return;
 
-    int newCap = buckets.size() * 2;
-    List<Node<K, V>> nb = new ArrayList<>(newCap);
-    for (int i = 0; i < newCap; i++)
-      nb.add(null);
+    Node<K, V>[] old = buckets;
+    buckets = (Node<K, V>[]) new Node[old.length * 2];
 
-    for (Node<K, V> head : buckets) {
+    for (Node<K, V> head : old) {
       for (Node<K, V> cur = head; cur != null;) {
         Node<K, V> nxt = cur.next;
-        int idx = idxFor(cur.key, newCap);
-        cur.next = nb.get(idx);
-        nb.set(idx, cur);
+        int idx = idxFor(cur.key, buckets.length);
+        cur.next = buckets[idx];
+        buckets[idx] = cur;
         cur = nxt;
       }
     }
-    buckets = nb;
   }
 
   private Node<K, V> findNode(Object key) {
-    if (buckets.isEmpty())
-      return null;
-    int i = idxFor(key, buckets.size());
-    for (Node<K, V> cur = buckets.get(i); cur != null; cur = cur.next) {
+    int i = idxFor(key, buckets.length);
+    for (Node<K, V> cur = buckets[i]; cur != null; cur = cur.next) {
       if ((key == null && cur.key == null) || (key != null && key.equals(cur.key)))
         return cur;
     }
@@ -127,25 +122,23 @@ public class HashMap<K, V> implements Map<K, V> {
       return n.setValue(value); // return old value!
     }
     rehashIfNeeded();
-    int i = idxFor(key, buckets.size());
-    Node<K, V> head = buckets.get(i);
+    int i = idxFor(key, buckets.length);
+    Node<K, V> head = buckets[i];
     Node<K, V> ins = new Node<>(key, value);
     ins.next = head;
-    buckets.set(i, ins);
+    buckets[i] = ins;
     size++;
     return null; // no previous value
   }
 
   @Override
   public V remove(Object key) {
-    if (buckets.isEmpty())
-      return null;
-    int i = idxFor(key, buckets.size());
-    Node<K, V> cur = buckets.get(i), prev = null;
+    int i = idxFor(key, buckets.length);
+    Node<K, V> cur = buckets[i], prev = null;
     while (cur != null) {
       if ((key == null && cur.key == null) || (key != null && key.equals(cur.key))) {
         if (prev == null)
-          buckets.set(i, cur.next);
+          buckets[i] = cur.next;
         else
           prev.next = cur.next;
         size--;
@@ -158,8 +151,9 @@ public class HashMap<K, V> implements Map<K, V> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void clear() {
-    buckets = new ArrayList<>();
+    buckets = (Node<K, V>[]) new Node[16];
     size = 0;
   }
 
@@ -172,7 +166,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
   @Override
   public Collection<V> values() {
-    List<V> vs = new ArrayList<>();
+    List<V> vs = new DoublyLinkedList<>();
     forEach((k, v) -> vs.add(v));
     return vs;
   }
@@ -196,8 +190,6 @@ public class HashMap<K, V> implements Map<K, V> {
   @Override
   public void forEach(BiConsumer<? super K, ? super V> action) {
     Objects.requireNonNull(action);
-    if (buckets.isEmpty())
-      return;
 
     for (Node<K, V> head : buckets) {
       for (Node<K, V> cur = head; cur != null; cur = cur.next) {

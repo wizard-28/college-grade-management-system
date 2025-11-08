@@ -1,6 +1,5 @@
 package gms.dsa;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Stack<T> {
@@ -47,7 +46,7 @@ public class Stack<T> {
 
   // top -> bottom
   public List<T> toList() {
-    List<T> out = new ArrayList<>(size);
+    List<T> out = new DoublyLinkedList<>();
     for (Node<T> cur = top; cur != null; cur = cur.next)
       out.add(cur.data);
     return out;

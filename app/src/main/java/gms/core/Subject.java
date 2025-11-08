@@ -4,7 +4,6 @@ import gms.dsa.Stack;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class Subject {
   private final String name;
@@ -32,11 +31,11 @@ public class Subject {
     return s.pop();
   }
 
-  public Optional<Double> latest(Exam ex) {
+  public Double latest(Exam ex) {
     Stack<Double> s = marks.get(ex);
     if (s.isEmpty())
-      return Optional.empty();
-    return Optional.of(s.peek());
+      return null;
+    return s.peek();
   }
 
   public List<Double> history(Exam ex) {

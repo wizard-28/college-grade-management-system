@@ -4,8 +4,6 @@ import gms.core.*;
 import gms.dsa.*;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Benchmarks core operations using analytical memory model instead of JVM heap
@@ -15,8 +13,8 @@ import java.util.List;
  */
 public class Benchmark {
   private static final int START = 500;
-  private static final int END = 10000;
-  private static final int STEP = 500;
+  private static final int END = 6000;
+  private static final int STEP = 1000;
   private static final int REPEAT = 1000;
 
   // Analytical memory constants
@@ -84,6 +82,7 @@ public class Benchmark {
       s.pushMark(1, "Math", Exam.CAT1, 95); // Warm-up
 
       long total = 0;
+      long memBefore = usedMemory(true);
       for (int i = 0; i < REPEAT; i++) {
         long t0 = System.nanoTime();
         s.pushMark(1, "Math", Exam.CAT1, 98);
@@ -91,8 +90,9 @@ public class Benchmark {
         total += (t1 - t0);
       }
       long avgTime = total / REPEAT;
-      long memKB = STACK_NODE_BYTES / 1024; // Analytical
 
+      long memAfter = usedMemory(false);
+      long memKB = memAfter - memBefore;
       out.write("PushMark," + h + "," + avgTime + "," + memKB + "\n");
     }
   }
@@ -108,6 +108,7 @@ public class Benchmark {
         s.pushMark(1, "Math", Exam.CAT1, 82);
 
       long total = 0;
+      long memBefore = usedMemory(true);
       for (int i = 0; i < REPEAT; i++) {
         long t0 = System.nanoTime();
         s.rollbackMark(1, "Math", Exam.CAT1);
@@ -116,7 +117,9 @@ public class Benchmark {
       }
       long avg = total / REPEAT;
 
-      out.write("RollbackMark," + h + "," + avg + ",0\n");
+      long memAfter = usedMemory(false);
+      long memKB = memAfter - memBefore;
+      out.write("RollbackMark," + h + "," + avg + "," + memKB + "\n");
     }
   }
 
@@ -129,6 +132,7 @@ public class Benchmark {
         s.pushMark(1, "Math", Exam.CAT1, 70 + (i % 20));
 
       long total = 0;
+      long memBefore = usedMemory(true);
       for (int i = 0; i < REPEAT; i++) {
         long t0 = System.nanoTime();
         s.latest(1, "Math", Exam.CAT1);
@@ -136,7 +140,10 @@ public class Benchmark {
         total += (t1 - t0);
       }
       long avg = total / REPEAT;
-      out.write("LatestMark," + h + "," + avg + ",0\n");
+
+      long memAfter = usedMemory(false);
+      long memKB = memAfter - memBefore; // Linked List Merge doesn't allocate anything else
+      out.write("LatestMark," + h + "," + avg + "," + memKB + "\n");
     }
   }
 
@@ -148,6 +155,7 @@ public class Benchmark {
         stack.push(80.0 + (i % 20));
 
       long total = 0;
+      long memBefore = usedMemory(true);
       for (int r = 0; r < REPEAT; r++) {
         long t0 = System.nanoTime();
         stack.toList();
@@ -156,27 +164,38 @@ public class Benchmark {
       }
       long avg = total / REPEAT;
 
-      long memKB = 0; // no extra allocation
+      long memAfter = usedMemory(false);
+      long memKB = memAfter - memBefore; // Linked List Merge doesn't allocate anything else
       out.write("HistoryDisplay," + h + "," + avg + "," + memKB + "\n");
     }
   }
 
   // ========== 5. MergeSort (O(n log n)) ==========
   private static void benchmarkMergeSort(FileWriter out, Institute inst, int n) throws IOException {
-    List<Student> list = inst.getAllStudents();
+    DoublyLinkedList<Student> list = inst.getAllStudents();
     MergeSort.sort(list, (a, b) -> Double.compare(b.getCGPA(), a.getCGPA())); // warm-up
 
     long total = 0;
+    long memBefore = usedMemory(true);
     for (int r = 0; r < REPEAT; r++) {
-      List<Student> copy = new ArrayList<>(list);
+      DoublyLinkedList<Student> copy = new DoublyLinkedList<>(list);
       long t0 = System.nanoTime();
       MergeSort.sort(copy, (a, b) -> Double.compare(b.getCGPA(), a.getCGPA()));
       long t1 = System.nanoTime();
       total += (t1 - t0);
     }
     long avg = total / REPEAT;
-    long memKB = (long) ((n * POINTER_BYTES) / 1024); // merge buffer size
+    long memAfter = usedMemory(false);
+    long memKB = memAfter - memBefore; // Linked List Merge doesn't allocate anything else
 
     out.write("MergeSort," + n + "," + avg + "," + memKB + "\n");
+  }
+
+  private static long usedMemory(boolean runGC) {
+    Runtime r = Runtime.getRuntime();
+    if (runGC)
+      System.gc();
+
+    return r.totalMemory() - r.freeMemory();
   }
 }

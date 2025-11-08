@@ -1,7 +1,7 @@
 package gms.core;
 
+import gms.dsa.DoublyLinkedList;
 import gms.dsa.HashMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -111,7 +111,7 @@ public class Institute {
       int sem = s.semester();
       List<Student> list = result.get(sem);
       if (list == null) {
-        list = new ArrayList<>();
+        list = new DoublyLinkedList<>();
         result.put(sem, list);
       }
       list.add(s);
@@ -119,8 +119,8 @@ public class Institute {
     return result;
   }
 
-  public List<Student> getAllStudents() {
-    List<Student> out = new ArrayList<>();
+  public DoublyLinkedList<Student> getAllStudents() {
+    DoublyLinkedList<Student> out = new DoublyLinkedList<>();
     forEachStudent(out::add);
     return out;
   }
