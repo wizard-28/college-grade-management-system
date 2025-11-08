@@ -47,6 +47,11 @@ public class HashMap<K, V> implements Map<K, V> {
     buckets = (Node<K, V>[]) new Node[16];
   }
 
+  @SuppressWarnings("unchecked")
+  public HashMap(int n) {
+    buckets = (Node<K, V>[]) new Node[n];
+  }
+
   private int idxFor(Object key, int mod) {
     return (key == null ? 0 : (key.hashCode() & 0x7fffffff)) % mod;
   }

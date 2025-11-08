@@ -29,6 +29,12 @@ public class Benchmark {
       benchmarkRollbackMark(out);
       System.out.println("Benchmarking LatestMark...");
       benchmarkLatest(out);
+      System.out.println("Benchmarking HashMap Put...");
+      benchmarkHashMapPut(out);
+      System.out.println("Benchmarking HashMap Get...");
+      benchmarkHashMapGet(out);
+      System.out.println("Benchmarking HashMap Remove...");
+      benchmarkHashMapRemove(out);
       System.out.println("Benchmarking HistoryDisplay...");
       benchmarkHistoryDisplay(out);
 
@@ -209,6 +215,108 @@ public class Benchmark {
     long memKB = totalMem / copies.size();
 
     out.write("MergeSort," + n + "," + avg + "," + memKB + "\n");
+  }
+
+  // ========== HashMap PUT (O(1)) ==========
+  private static void benchmarkHashMapPut(FileWriter out) throws IOException {
+    for (int n = START; n <= END; n += STEP) {
+
+      // Create several independent HashMaps (avoids accumulated size)
+      DoublyLinkedList<HashMap<String, Integer>> copies = new DoublyLinkedList<>();
+      for (int r = 0; r < REPEAT / 10; r++) {
+        // Pre-allocate larger bucket array to minimize rehash
+        copies.add(new HashMap<String, Integer>(n * 2));
+      }
+
+      long total = 0;
+      for (HashMap<String, Integer> map : copies) {
+        System.gc();
+        long t0 = System.nanoTime();
+        map.put("K" + n, n); // insert one element
+        long t1 = System.nanoTime();
+        total += (t1 - t0);
+      }
+
+      // Memory Measurement (per map)
+      long totalMem = 0;
+      for (HashMap<String, Integer> map : copies) {
+        long before = usedMemory(true);
+        map.put("K_mem" + n, n);
+        long after = usedMemory(false);
+        totalMem += (after - before);
+      }
+
+      long avgTime = total / (REPEAT / 10);
+      long avgMem = totalMem / copies.size();
+      System.gc();
+
+      out.write("HashMapPut," + n + "," + avgTime + "," + avgMem + "\n");
+    }
+  }
+
+  // ========== 6. HashMap GET (O(1)) ==========
+  private static void benchmarkHashMapGet(FileWriter out) throws IOException {
+    for (int n = START; n <= END; n += STEP) {
+      HashMap<String, Integer> map = new HashMap<>();
+      for (int i = 0; i < n; i++)
+        map.put("K" + i, i);
+
+      long total = 0;
+      long memBefore = usedMemory(true);
+
+      for (int r = 0; r < REPEAT; r++) {
+        long t0 = System.nanoTime();
+        map.get("K" + (n / 2));
+        long t1 = System.nanoTime();
+        total += (t1 - t0);
+      }
+
+      long memAfter = usedMemory(false);
+      long avg = total / REPEAT;
+      long memKB = memAfter - memBefore;
+
+      out.write("HashMapGet," + n + "," + avg + "," + memKB + "\n");
+    }
+  }
+
+  // ========== 7. HashMap REMOVE (O(1)) ==========
+  private static void benchmarkHashMapRemove(FileWriter out) throws IOException {
+    for (int n = START; n <= END; n += STEP) {
+
+      DoublyLinkedList<HashMap<String, Integer>> copies = new DoublyLinkedList<>();
+      for (int r = 0; r < REPEAT / 10; r++) {
+        copies.add(new HashMap<String, Integer>(n * 2));
+      }
+
+      long total = 0;
+      for (HashMap<String, Integer> map : copies) {
+        for (int i = 0; i < n; i++)
+          map.put("K" + i, i);
+
+        System.gc();
+        long t0 = System.nanoTime();
+        map.remove("K" + (n / 2));
+        long t1 = System.nanoTime();
+        total += (t1 - t0);
+      }
+
+      long totalMem = 0;
+      for (HashMap<String, Integer> map : copies) {
+        for (int i = 0; i < n; i++)
+          map.put("K" + i, i);
+
+        long before = usedMemory(true);
+        map.remove("K" + (n / 2));
+        long after = usedMemory(false);
+        totalMem += (after - before);
+      }
+
+      long avg = total / REPEAT / 10;
+      long memKB = totalMem / copies.size();
+      System.gc();
+
+      out.write("HashMapRemove," + n + "," + avg + "," + memKB + "\n");
+    }
   }
 
   private static long usedMemory(boolean runGC) {

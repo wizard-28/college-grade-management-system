@@ -133,6 +133,7 @@ The menu with all the options. Some of these options are hidden based on context
 | Latest mark retrival for report card generation (`LatestMark`) | Custom Stack.peek()                         | O(1)            | O(1)  |
 | Revalutaion history display (`HistoryTraversal`)               | Stack Traversal                             | O(n)            | O(1)  |
 | Sort Students by CGPA for display                              | Custom Iterative Merge Sort for Linked List | O(n log n)      | O(1)  |
+| HashMap Get/Put/Remove used for Student/Subject management     | Custom HashMap                              | O(1)            | O(1)  |
 
 ## Future Enhancements
 

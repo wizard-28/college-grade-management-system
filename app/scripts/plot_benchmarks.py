@@ -49,7 +49,7 @@ def plot_flat(ax, x, y, label):
 
 
 # Prepare figure (2 rows × 3 cols): top = time; bottom = memory
-fig, axes = plt.subplots(2, 3, figsize=(14, 9))
+fig, axes = plt.subplots(2, 4, figsize=(18, 8))  # EDITED
 fig.suptitle(
     "Benchmark Results — Time & Memory (with Theoretical References)",
     fontsize=14,
@@ -116,6 +116,23 @@ ax.set_ylabel("Δ Memory (KB)")
 ax.grid(True)
 ax.legend(fontsize=9)
 
+# ✅ ---------------- TIME: HashMap Ops (New Subplot) ----------------
+
+HASHMAP_OPS = ["HashMapPut", "HashMapGet", "HashMapRemove"]
+ax = axes[0][3]
+for op in HASHMAP_OPS:
+    if op in data:
+        x = [row[0] for row in data[op]]  # Number of items in HashMap
+        y = [row[1] for row in data[op]]  # Time in ns
+        ax.plot(x, y, marker="o", label=op)
+if "HashMapPut" in data:
+    plot_flat(ax, x, y, "O(1) Ref")
+ax.set_title("Time — HashMap Put/Get/Remove", fontsize=11)
+ax.set_xlabel("Number of Items")
+ax.set_ylabel("Time (ns)")
+ax.grid(True)
+ax.legend(fontsize=9)
+
 # ---------------- MEMORY: MergeSort vs STUDENTS -------------
 ax = axes[1][1]
 if "MergeSort" in data:
@@ -143,6 +160,21 @@ ax.set_ylabel("Δ Memory (KB)")
 ax.grid(True)
 ax.legend(fontsize=9)
 
+# ✅ ---------------- MEMORY: HashMap Ops (New Subplot) ----------------
+ax = axes[1][3]  # EDITED
+for op in HASHMAP_OPS:
+    if op in data:
+        x = [row[0] for row in data[op]]
+        m = [row[2] for row in data[op]]
+        ax.plot(x, m, marker="o", label=op)
+if "HashMapPut" in data:
+    plot_flat(ax, x, m, "O(1) Ref")
+ax.set_title("Memory — HashMap Ops", fontsize=11)
+ax.set_xlabel("Number of Items")
+ax.set_ylabel("Δ Memory (KB)")
+ax.grid(True)
+ax.legend(fontsize=9)
+
 plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.subplots_adjust(hspace=0.5, wspace=0.25)
+plt.subplots_adjust(hspace=0.5, wspace=0.3)
 plt.show()
