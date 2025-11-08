@@ -254,12 +254,7 @@ public class CLI {
     }
     for (int i = 0; i < subs.size(); i++)
       System.out.println("  " + (i + 1) + ". " + subs.get(i));
-    int idx = readInt("Choose subject (number): ");
-    if (idx < 1 || idx > subs.size()) {
-      System.out.println("Invalid.");
-      waitEnter();
-      return;
-    }
+    int idx = readInt("Choose subject (number): ", 1, subs.size());
     Exam last = inst.lastExam().get();
     boolean ok = st.rollbackMark(st.semester(), subs.get(idx - 1), last);
     System.out.println(ok ? "Rolled back." : "Cannot rollback — only one mark in history.");
@@ -287,14 +282,7 @@ public class CLI {
         return;
       System.out.println("\nStudent: " + s.id() + " - " + s.name());
       for (String sub : subs) {
-        double mark;
-        while (true) {
-          mark = readDouble("  " + sub + " marks (0-100): ");
-          if (mark < 0 || mark > 100)
-            System.out.println("Invalid range!");
-          else
-            break;
-        }
+        double mark = readDouble("  " + sub + " marks (0-100): ", 0, 100);
         s.pushMark(s.semester(), sub, ex, mark);
         nSub[0]++;
       }
@@ -332,20 +320,8 @@ public class CLI {
     System.out.println("Subjects:");
     for (int i = 0; i < subs.size(); i++)
       System.out.println("  " + (i + 1) + ". " + subs.get(i));
-    int idx = readInt("Choose subject (number): ");
-    if (idx < 1 || idx > subs.size()) {
-      System.out.println("Invalid selection.");
-      waitEnter();
-      return;
-    }
-    double mark;
-    while (true) {
-      mark = readDouble("Enter new " + ex.display() + " marks (0-100): ");
-      if (mark < 0 || mark > 100)
-        System.out.println("Invalid range!");
-      else
-        break;
-    }
+    int idx = readInt("Choose subject (number): ", 1, subs.size());
+    double mark = readDouble("Enter new " + ex.display() + " marks (0-100): ", 0, 100);
     s.pushMark(s.semester(), subs.get(idx - 1), ex, mark);
     inst.markUpdated(ex);
     System.out.println("Updated (revaluation).");
@@ -384,12 +360,7 @@ public class CLI {
     }
     for (int i = 0; i < subs.size(); i++)
       System.out.println("  " + (i + 1) + ". " + subs.get(i));
-    int idx = readInt("Choose subject (number): ");
-    if (idx < 1 || idx > subs.size()) {
-      System.out.println("Invalid.");
-      waitEnter();
-      return;
-    }
+    int idx = readInt("Choose subject (number): ", 1, subs.size());
     String sub = subs.get(idx - 1);
     for (Exam ex : new Exam[] { Exam.CAT1, Exam.CAT2, Exam.FAT }) {
       List<Double> hist = s.history(s.semester(), sub, ex);
@@ -426,11 +397,32 @@ public class CLI {
     }
   }
 
-  private double readDouble(String prompt) {
+  private int readInt(String prompt, int start, int end) {
     while (true) {
       try {
         System.out.print(prompt);
-        return Double.parseDouble(in.nextLine().trim());
+        int number = Integer.parseInt(in.nextLine().trim());
+        if (number < start || number > end) {
+          System.out.println("Invalid range.");
+        } else {
+          return number;
+        }
+      } catch (NumberFormatException e) {
+        System.out.println("Invalid number.");
+      }
+    }
+  }
+
+  private double readDouble(String prompt, double start, double end) {
+    while (true) {
+      try {
+        System.out.print(prompt);
+        double number = Double.parseDouble(in.nextLine().trim());
+        if (number < start || number > end) {
+          System.out.println("Invalid range.");
+        } else {
+          return number;
+        }
       } catch (NumberFormatException e) {
         System.out.println("Invalid number.");
       }

@@ -1,4 +1,4 @@
-package gms.utils;
+package gms.io;
 
 import java.io.*;
 import java.util.ArrayList;
