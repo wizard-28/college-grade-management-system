@@ -93,3 +93,4 @@ nb-configuration.xml
 ## Database
 ##############################
 app/data/
+data/
