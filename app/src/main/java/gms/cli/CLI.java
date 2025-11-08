@@ -21,6 +21,45 @@ public class CLI {
   public void run() {
     while (true) {
       System.out.println("\n╔══════════════════════════════════════════════════╗");
+      System.out.println("║                 Main Menu                        ║");
+      System.out.println("╚══════════════════════════════════════════════════╝");
+      System.out.println("1. Start Grade Management System");
+      System.out.println("2. Run Benchmarks");
+      System.out.println("3. Exit");
+      int ch = readInt("Enter choice: ");
+
+      switch (ch) {
+        case 1:
+          runGMS();
+          break;
+        case 2:
+          System.out.println("Running benchmarks with synthetic data...");
+          Benchmark.runAll();
+          System.out.println("Generating plots with Python...");
+          try {
+            ProcessBuilder pb = new ProcessBuilder("python3", "app/scripts/plot_benchmarks.py");
+            pb.inheritIO();
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+            if (exitCode != 0)
+              System.out.println("Python script failed. Exit code: " + exitCode);
+          } catch (Exception e) {
+            System.out.println("Could not run Python script: " + e.getMessage());
+          }
+          waitEnter();
+          break;
+        case 3:
+          System.out.println("Exiting...");
+          return;
+        default:
+          System.out.println("Invalid choice.");
+      }
+    }
+  }
+
+  public void runGMS() {
+    while (true) {
+      System.out.println("\n╔══════════════════════════════════════════════════╗");
       System.out.println("║               Grade Management System            ║");
       System.out.println("╚══════════════════════════════════════════════════╝");
       System.out.println("Current Semester: " + inst.currentSemester());
@@ -58,7 +97,7 @@ public class CLI {
         if (inst.lastExam().isPresent()) {
           Exam lastEx = inst.lastExam().get();
           System.out.println(" 9. Rollback Last " + lastEx + " Marks (Return to Previous Mark)");
-        } // Same logic as C++
+        }
 
         System.out.println("\n──────────────────── REPORTS ───────────────────────");
         System.out.println("10. Show Student Report");
@@ -66,10 +105,9 @@ public class CLI {
       }
 
       System.out.println("\n──────────────────── TOOLS ─────────────────────────");
-      System.out.println("12. Run Benchmarks");
-      System.out.println("13. Save Data");
-      System.out.println("14. Delete Data");
-      System.out.println("15. Exit");
+      System.out.println("12. Save Data");
+      System.out.println("13. Delete Data");
+      System.out.println("14. Exit");
       System.out.println("────────────────────────────────────────────────────");
 
       int choice = readInt("Enter choice: ");
@@ -108,37 +146,20 @@ public class CLI {
           showHistory();
           break;
         case 12:
-          System.out.println("Running benchmarks with synthetic data...");
-          Benchmark.runAll();
-          System.out.println("Generating plots with Python...");
-          try {
-            ProcessBuilder pb = new ProcessBuilder("python3", "app/scripts/plot_benchmarks.py");
-            pb.inheritIO();
-            Process process = pb.start();
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-              System.out.println("Python script failed. Exit code: " + exitCode);
-            }
-          } catch (Exception e) {
-            System.out.println("Could not run Python script: " + e.getMessage());
-          }
-          waitEnter();
-          break;
-        case 13:
           if (gms.io.PersistenceManager.saveCSV(inst, "data")) {
             System.out.println("Successfully saved data.");
           }
           waitEnter();
           break;
-        case 14:
+        case 13:
           if (gms.io.PersistenceManager.deleteCSV("data")) {
             System.out.println("Successfully deleted data");
           }
           waitEnter();
           break;
-        case 15:
+        case 14:
           System.out.println("Exiting...");
-          return;
+          System.exit(0);
         default:
           System.out.println("Invalid choice.");
       }
