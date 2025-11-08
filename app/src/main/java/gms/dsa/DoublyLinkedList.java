@@ -102,7 +102,7 @@ public class DoublyLinkedList<T> implements List<T> {
     };
   }
 
-  public Iterator<T> reverseIterator() { // top → bottom in stack
+  public Iterator<T> reverseIterator() { // top -> bottom in stack
     return new Iterator<T>() {
       Node<T> cur = tail;
 
@@ -275,6 +275,7 @@ public class DoublyLinkedList<T> implements List<T> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <E> E[] toArray(E[] a) {
     if (a.length < size)
       a = (E[]) new Object[size];

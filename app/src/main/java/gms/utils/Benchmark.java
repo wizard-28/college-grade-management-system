@@ -4,8 +4,6 @@ import gms.core.*;
 import gms.dsa.*;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 /**
  * Benchmarks core operations using analytical memory model instead of JVM heap
@@ -41,7 +39,7 @@ public class Benchmark {
         benchmarkMergeSort(out, inst, n);
       }
 
-      System.out.println("Benchmarks complete → benchmarks.csv");
+      System.out.println("Benchmarks complete -> benchmarks.csv");
     } catch (IOException e) {
       System.err.println("Error writing benchmarks.csv: " + e.getMessage());
     }

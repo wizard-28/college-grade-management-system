@@ -47,6 +47,7 @@ public class Stack<T> {
     }
   }
 
+  @SuppressWarnings("unused")
   public void emptyTraversal() {
     if (isEmpty()) {
       System.out.print("(none)");
