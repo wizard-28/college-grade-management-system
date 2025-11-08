@@ -11,7 +11,6 @@ public class Institute {
   private int currentSemester = 1;
 
   private boolean cat1Done, cat2Done, fatDone;
-  private boolean cat1Updated, cat2Updated, fatUpdated;
 
   // students
   public void addStudent(Student s) {
@@ -66,7 +65,6 @@ public class Institute {
   public void nextSemester() {
     currentSemester++;
     resetExamFlow();
-    resetUpdateFlags();
   }
 
   public boolean isCat1Done() {
@@ -97,24 +95,6 @@ public class Institute {
     cat1Done = cat2Done = fatDone = false;
   }
 
-  public void markUpdated(Exam e) {
-    switch (e) {
-      case CAT1:
-        cat1Updated = true;
-        break;
-      case CAT2:
-        cat2Updated = true;
-        break;
-      case FAT:
-        fatUpdated = true;
-        break;
-    }
-  }
-
-  public void resetUpdateFlags() {
-    cat1Updated = cat2Updated = fatUpdated = false;
-  }
-
   public Optional<Exam> lastExam() {
     if (isFatDone())
       return Optional.of(Exam.FAT);
@@ -123,21 +103,6 @@ public class Institute {
     if (isCat1Done())
       return Optional.of(Exam.CAT1);
     return Optional.empty();
-  }
-
-  public boolean canShowRollback() {
-    Optional<Exam> last = lastExam();
-    if (!last.isPresent())
-      return false;
-    switch (last.get()) {
-      case CAT1:
-        return cat1Updated;
-      case CAT2:
-        return cat2Updated;
-      case FAT:
-        return fatUpdated;
-    }
-    return false;
   }
 
   public HashMap<Integer, List<Student>> getAllStudentsBySemester() {

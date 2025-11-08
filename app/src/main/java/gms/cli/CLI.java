@@ -54,9 +54,9 @@ public class CLI {
           System.out.println(" 8. Update FAT Marks (Revaluation)");
         }
 
-        if (inst.canShowRollback() && inst.lastExam().isPresent()) {
+        if (inst.lastExam().isPresent()) {
           Exam lastEx = inst.lastExam().get();
-          System.out.println(" 9. Rollback Last " + lastEx + " Marks");
+          System.out.println(" 9. Rollback Last " + lastEx + " Marks (Return to Previous Mark)");
         } // Same logic as C++
 
         System.out.println("\n──────────────────── REPORTS ───────────────────────");
@@ -234,8 +234,8 @@ public class CLI {
   }
 
   private void rollback() {
-    if (!inst.canShowRollback()) {
-      System.out.println("No marks to rollback.");
+    if (!inst.lastExam().isPresent()) {
+      System.out.println("INVALID");
       waitEnter();
       return;
     }
@@ -323,7 +323,6 @@ public class CLI {
     int idx = readInt("Choose subject (number): ", 1, subs.size());
     double mark = readDouble("Enter new " + ex.display() + " marks (0-100): ", 0, 100);
     s.pushMark(s.semester(), subs.get(idx - 1), ex, mark);
-    inst.markUpdated(ex);
     System.out.println("Updated (revaluation).");
     waitEnter();
   }
