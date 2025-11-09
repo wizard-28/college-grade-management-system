@@ -2,6 +2,8 @@
 
 A full-fledged (mostly) java grade management system that handles student records, subjects, exams, mark histories, grade computation, semester promotion, CSV-based persistence and performance benchmarking all using custom data structures and algorithms.
 
+Built entirely from scratch using **handcrafted data structures and algorithms** - including a custom HashMap, Stack, Doubly Linked List, and iterative Merge Sort.
+
 ## Dependencies
 
 - Java 11+
@@ -22,6 +24,17 @@ java -XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC -XX:+AlwaysPreTouch -cp 
 ```
 
 ## Features
+
+### Custom Data Structures & Algorithms (Core Highlight)
+
+- Custom-built:
+  - **Doubly Linked List** (with head & tail pointers)
+  - **Stack using Linked List** (push, pop, peek in O(1))
+  - **HashMap with chaining** (custom hashing + collision handling)
+  - **Iterative Merge Sort for Linked Lists**
+- Every core academic feature (marks, history, sorting, rollback, persistence) is powered using these self-implemented structures.
+
+Discussed in depth at [dsa.md](docs/dsa.md)
 
 ### Student & Subject Management
 
@@ -142,8 +155,3 @@ The menu with all the options. Some of these options are hidden based on context
 - Add authentication for admin access
 - Transaction log for marks & revaluation history
 - GPA trend graphs per student
-
-## Authors & License
-
-- Developed as a DSA + OOP + File Handling academic project
-- Uses only custom-built data structures—no Java Collections
