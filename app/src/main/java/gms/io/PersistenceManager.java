@@ -6,6 +6,7 @@ import gms.core.Student;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 public class PersistenceManager {
@@ -45,7 +46,8 @@ public class PersistenceManager {
         marks.header("regid", "semester", "subject", "exam", "values");
         sgpa.header("regid", "semester", "sgpa");
 
-        state.row(inst.currentSemester(), b(inst.isCat1Done()), b(inst.isCat2Done()), b(inst.isFatDone()));
+        state.row(inst.currentSemester(), booleanToInteger(inst.isCat1Done()), booleanToInteger(inst.isCat2Done()),
+            booleanToInteger(inst.isFatDone()));
 
         inst.forEachStudent(s -> {
           students.row(s.id(), s.name(), s.semester(), s.getCGPA());
@@ -56,10 +58,12 @@ public class PersistenceManager {
               for (Exam ex : new Exam[] { Exam.CAT1, Exam.CAT2, Exam.FAT }) {
                 StringBuilder values = new StringBuilder();
                 var hist = s.marksHistory(sem, sub, ex);
-                for (int i = 0; i < hist.size(); i++) {
-                  values.append(hist.get(i));
-                  if (i + 1 < hist.size())
+                boolean first = true;
+                for (Double v : hist) {
+                  if (!first)
                     values.append(';');
+                  values.append(v);
+                  first = false;
                 }
                 marks.row(s.id(), sem, sub, ex.display(), values.toString());
               }
@@ -92,10 +96,11 @@ public class PersistenceManager {
           r.readRow(); // header
           List<String> row = r.readRow();
           if (row != null && row.size() >= 4) {
-            inst.setCurrentSemester(Integer.parseInt(row.get(0)));
-            inst.setCat1Done("1".equals(row.get(1)) || "true".equalsIgnoreCase(row.get(1)));
-            inst.setCat2Done("1".equals(row.get(2)) || "true".equalsIgnoreCase(row.get(2)));
-            inst.setFatDone("1".equals(row.get(3)) || "true".equalsIgnoreCase(row.get(3)));
+            Iterator<String> it = row.iterator();
+            inst.setCurrentSemester(Integer.parseInt(it.next()));
+            inst.setCat1Done(parseBool(it.next()));
+            inst.setCat2Done(parseBool(it.next()));
+            inst.setFatDone(parseBool(it.next()));
           }
         }
       }
@@ -108,15 +113,20 @@ public class PersistenceManager {
           while ((row = r.readRow()) != null) {
             if (row.size() < 4)
               continue;
-            String id = row.get(0);
-            String name = row.get(1);
-            int sem = Integer.parseInt(row.get(2));
-            double cg = Double.parseDouble(row.get(3));
+
+            Iterator<String> it = row.iterator();
+            String id = it.next();
+            String name = it.next();
+            int sem = Integer.parseInt(it.next());
+            double cg = Double.parseDouble(it.next());
+
             if (inst.getStudent(id) == null)
               inst.addStudent(new Student(id, name));
+
             Student s = inst.getStudent(id);
             while (s.semester() < sem)
               s.promoteOneSemester();
+
             s.setCGPA(cg);
           }
         }
@@ -125,16 +135,19 @@ public class PersistenceManager {
       // subjects
       if (subjectsF.exists()) {
         try (CSV.Reader r = new CSV.Reader(subjectsF.getPath())) {
-          r.readRow();
+          r.readRow(); // skip header
           List<String> row;
           while ((row = r.readRow()) != null) {
             if (row.size() < 3)
               continue;
-            String id = row.get(0);
+
+            Iterator<String> it = row.iterator();
+
+            String id = it.next();
             Student s = inst.getStudent(id);
             if (s != null) {
-              int sem = Integer.parseInt(row.get(1));
-              String sub = row.get(2);
+              int sem = Integer.parseInt(it.next());
+              String sub = it.next();
               s.addSubject(sem, sub);
             }
           }
@@ -144,19 +157,24 @@ public class PersistenceManager {
       // marks
       if (marksF.exists()) {
         try (CSV.Reader r = new CSV.Reader(marksF.getPath())) {
-          r.readRow();
+          r.readRow(); // skip header
           List<String> row;
           while ((row = r.readRow()) != null) {
             if (row.size() < 5)
               continue;
-            String id = row.get(0);
+
+            Iterator<String> it = row.iterator();
+
+            String id = it.next();
             Student s = inst.getStudent(id);
             if (s == null)
               continue;
-            int sem = Integer.parseInt(row.get(1));
-            String sub = row.get(2);
-            Exam ex = Exam.fromString(row.get(3));
-            String vals = row.get(4);
+
+            int sem = Integer.parseInt(it.next());
+            String sub = it.next();
+            Exam ex = Exam.fromString(it.next());
+            String vals = it.next();
+
             if (!vals.isEmpty()) {
               for (String tok : vals.split(";")) {
                 if (!tok.isEmpty())
@@ -170,17 +188,22 @@ public class PersistenceManager {
       // sgpa
       if (sgpaF.exists()) {
         try (CSV.Reader r = new CSV.Reader(sgpaF.getPath())) {
-          r.readRow();
+          r.readRow(); // skip header
           List<String> row;
           while ((row = r.readRow()) != null) {
             if (row.size() < 3)
               continue;
-            String id = row.get(0);
+
+            Iterator<String> it = row.iterator();
+
+            String id = it.next();
             Student s = inst.getStudent(id);
             if (s == null)
               continue;
-            int sem = Integer.parseInt(row.get(1));
-            double val = Double.parseDouble(row.get(2));
+
+            int sem = Integer.parseInt(it.next());
+            double val = Double.parseDouble(it.next());
+
             s.setSGPA(sem, val);
           }
         }
@@ -193,7 +216,11 @@ public class PersistenceManager {
     }
   }
 
-  private static int b(boolean v) {
+  private static int booleanToInteger(boolean v) {
     return v ? 1 : 0;
+  }
+
+  private static boolean parseBool(String s) {
+    return "1".equals(s) || "true".equalsIgnoreCase(s);
   }
 }

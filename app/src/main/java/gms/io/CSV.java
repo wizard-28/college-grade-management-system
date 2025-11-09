@@ -1,8 +1,9 @@
 package gms.io;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
+
+import gms.dsa.DoublyLinkedList;
 
 public class CSV {
   public static final String SEP = ",";
@@ -48,8 +49,8 @@ public class CSV {
       if (line == null)
         return null;
       if (line.isEmpty())
-        return new ArrayList<>();
-      List<String> cols = new ArrayList<>();
+        return new DoublyLinkedList<>();
+      List<String> cols = new DoublyLinkedList<>();
       String[] parts = line.split(",", -1);
       for (String p : parts)
         cols.add(p.trim());
