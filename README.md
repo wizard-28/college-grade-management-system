@@ -45,12 +45,12 @@ Discussed in depth at [dsa.md](docs/dsa.md)
 
 ### Examination Workflow
 
-| Exam Order         | Action                                |
-| ------------------ | ------------------------------------- |
-| CAT1               | Enter marks for all students          |
-| CAT2               | Enter marks after CAT1                |
-| FAT                | Enter marks after CAT2                |
-| Semester Promotion | Student gets prmoted to next semester |
+| Exam Order         | Action                                | Weightage |
+| ------------------ | ------------------------------------- | --------- |
+| CAT1               | Enter marks for all students          | 30%       |
+| CAT2               | Enter marks after CAT1                | 30%       |
+| FAT                | Enter marks after CAT2                | 40%       |
+| Semester Promotion | Student gets prmoted to next semester |           |
 
 After each exam you can revaluate the marks for a student, and you can rollback an invalid revaluation.
 
@@ -157,6 +157,8 @@ Demonstrated below are some sample test cases. 5 successful test cases and 1 fai
 ![pic1](docs/assets/adding_initial_student_1.png)
 
 Adding initial student to the system.
+
+**There is no restriction on the registration ID format as this is meant to be a sample system.**
 
 ![pic2](docs/assets/adding_initial_student_2.png)
 
